@@ -1,0 +1,17 @@
+{% extends "epu/base.html" %}
+{% block title %}
+    Pack Listing
+{% endblock %}
+{% block body %}
+    {% if info %}
+        <div class="box info">
+            {{info}}
+        </div>
+    {% endif %}
+    <h1>Pack {{pack.name}}</h1>
+    <ul>
+        <li><a href="{% url 'epu:pack_detail' pack.id %}">MultiMC Instance</a></li>
+        <li><a href="{% url 'epu:pack_detail' pack.id %}">todo</a></li>
+        <li><a href="{% url 'epu:pack_detail' pack.id %}">todo</a></li>
+    </ul>
+{% endblock %}

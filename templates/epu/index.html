@@ -1,0 +1,17 @@
+{% extends "epu/base.html" %}
+{% block title %}
+    Pack Listing
+{% endblock %}
+{% block body %}
+    {% if info %}
+        <div class="box info">
+            {{info}}
+        </div>
+    {% endif %}
+    <h1>Packs</h1>
+    <ul>
+        {% for pack in packs %}
+            <li><a href="{% url 'epu:pack_detail' pack.id %}">{{pack.name}}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

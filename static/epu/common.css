@@ -1,0 +1,66 @@
+div.box
+{
+    border-radius: 5px;
+    border: 1px solid black;
+    width: 800px;
+    padding: 25px;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+div.error
+{
+    background-color: #FFAAAA;
+}
+
+div.info
+{
+    background-color: #AAAAFF;
+}
+
+form button[type="submit"]
+{
+    float: right;
+}
+
+h1
+{
+    margin-top: -25px;
+}
+
+nav
+{
+    display: inline-block;
+}
+
+nav ul
+{
+    position: absolute;
+    top: 0px;
+    right: 10px;
+}
+
+nav li
+{
+    display: inline;
+}
+
+nav li
+{
+    margin-left: 5px;
+}
+
+nav li:first-child::before
+{
+    content: '';
+}
+
+nav li::before
+{
+    content: '/';
+    opacity: 85%;
+    font-weight: bold;
+    font-size: 105%;
+    margin-right: 5px;
+}

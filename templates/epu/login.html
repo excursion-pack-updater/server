@@ -2,56 +2,31 @@
 {% block title %}
     Log in
 {% endblock %}
-{% block head %}
-    <style type="text/css">
-        div.box
-        {
-            border-radius: 5px;
-            border: 1px solid black;
-            width: 50vw;
-            margin: 0 auto;
-            padding: 25px;
-        }
-        
-        div.error
-        {
-            background-color: #FFAAAA;
-        }
-        
-        div.info
-        {
-            background-color: #AAAAFF;
-        }
-        
-        button
-        {
-            float: right;
-        }
-    </style>
-{% endblock %}
 {% block body %}
+    <h1>Login</h1>
+    <br>
     {% if error %}
         <div class="box error">
             {{error}}
         </div>
     {% endif %}
+    
     {% if info %}
         <div class="box info">
             {{info}}
         </div>
     {% endif %}
-    <div class="box">
-        To log in, fill in your email address and click the button below, you will receive an email with a link that will log you in automatically.
-        <br><br>
-        <form action="{% url 'epu:login' "" %}">
-            {% csrf_token %}
-            
-            <label>Email</label>
-            <input type="text" name="email">
-            
-            <button type="submit" formmethod="post">
-                Send me a login link
-            </button>
-        </form>
-    </div>
+    
+    To log in, fill in your email address and click the button below, you will receive an email with a link that will log you in automatically.
+    <br><br>
+    <form action="{% url 'epu:login' "" %}">
+        {% csrf_token %}
+        
+        <label>Email</label>
+        <input type="text" name="email">
+        
+        <button type="submit" formmethod="post">
+            Send me a login link
+        </button>
+    </form>
 {% endblock %}

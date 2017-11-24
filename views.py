@@ -6,7 +6,7 @@ import time
 from django.contrib.auth.models import User as BaseUser
 from django.core.mail import send_mail
 from django.http import *
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils import timezone
@@ -38,7 +38,7 @@ def login(request, key):
             if authObj.expires < timezone.now():
                 raise AuthKeys.DoesNotExist
             
-            return render(request, "epu/index.html", {"info": "You have logged in."})
+            return render(request, "epu/login.html", {"info": "You have logged in."})
         except AuthKeys.DoesNotExist:
             return render(request, "epu/login.html", {"error": "The authorization key is invalid (has it expired?)"})
         
@@ -83,9 +83,23 @@ def login(request, key):
         except BaseUser.DoesNotExist:
             pass
         
-        return render(request, "epu/login_pending.html", {"email": email})
+        return render(
+            request,
+            "epu/login.html",
+            {
+                "info": "An email has been sent to {} (if that email is registered). The link will expire after an hour.".format(email)
+            }
+        )
     else:
         return HttpResponseBadRequest()
 
 def logout(request):
     pass
+
+def pack(request, id):
+    pack = get_object_or_404(Pack, pk=id)
+    
+    return render(request, "epu/pack.html", {"pack": pack})
+
+def index(request):
+    return render(request, "epu/index.html", {"packs": Pack.objects.all()})
