@@ -17,8 +17,11 @@
         <nav>
             <ul>
                 <li><a href="{% url 'epu:index' %}">index</a></li>
-                <li><a href="{% url 'epu:login' %}">login</a></li>
-                <li><a href="{% url 'epu:logout' %}">logout</a></li>
+                {% if not user %}
+                    <li><a href="{% url 'epu:login' %}">login</a></li>
+                {% else %}
+                    <li><a href="{% url 'epu:logout' %}">logout</a></li>
+                {% endif %}
             </ul>
         </nav>
         {% block body %}

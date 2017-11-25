@@ -17,6 +17,7 @@ class AuthKeys(models.Model):
 class Pack(models.Model):
     name = models.CharField(max_length=1024)
     gitURL = models.CharField(max_length=1024)
+    public = models.BooleanField(default=False)
     
     def __str__(self):
         return self.name

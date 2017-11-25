@@ -23,25 +23,29 @@ def generatePassword(request):
 
 def login(request, key):
     from bs4 import BeautifulSoup
+    from django.contrib.auth import login
     
     if request.method == "GET":
         if not key:
             return render(request, "epu/login.html")
         
         ctx = {}
+        authObj = None
         
         try:
             authObj = AuthKeys.objects.get(key__exact=key)
             
-            authObj.delete()
-            
             if authObj.expires < timezone.now():
                 raise AuthKeys.DoesNotExist
+            
+            login(request, authObj.user)
             
             return render(request, "epu/login.html", {"info": "You have logged in."})
         except AuthKeys.DoesNotExist:
             return render(request, "epu/login.html", {"error": "The authorization key is invalid (has it expired?)"})
-        
+        finally:
+            if authObj:
+                authObj.delete()
     elif request.method == "POST":
         '''import json
         
@@ -94,7 +98,13 @@ def login(request, key):
         return HttpResponseBadRequest()
 
 def logout(request):
-    pass
+    from django.contrib.auth import logout
+    
+    if request.user.is_authenticated:
+        logout(request)
+        return render(request, "epu/login.html", {"info": "You have logged out."})
+    else:
+        return render(request, "epu/login.html", {"error": "You are not logged in."})
 
 def pack(request, id):
     pack = get_object_or_404(Pack, pk=id)
@@ -102,4 +112,17 @@ def pack(request, id):
     return render(request, "epu/pack.html", {"pack": pack})
 
 def index(request):
-    return render(request, "epu/index.html", {"packs": Pack.objects.all()})
+    packs = list(Pack.objects.filter(public=True))
+    
+    if request.user.is_authenticated:
+        try:
+            user = User.objects.get(base=request.user)
+            packs += user.allowedPacks.all()
+        except User.DoesNotExist:
+            pass
+    
+    ctx = {
+        "packs": packs,
+    }
+    
+    return render(request, "epu/index.html", ctx)

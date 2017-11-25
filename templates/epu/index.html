@@ -9,6 +9,11 @@
         </div>
     {% endif %}
     <h1>Packs</h1>
+    {% if user %}
+        Hello {{user.first_name | default:user.username}}! You have access to the following packs:
+    {% else %}
+        The following public packs are available:
+    {% endif %}
     <ul>
         {% for pack in packs %}
             <li><a href="{% url 'epu:pack_detail' pack.id %}">{{pack.name}}</a></li>

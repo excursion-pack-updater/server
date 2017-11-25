@@ -17,16 +17,20 @@
         </div>
     {% endif %}
     
-    To log in, fill in your email address and click the button below, you will receive an email with a link that will log you in automatically.
-    <br><br>
-    <form action="{% url 'epu:login' "" %}">
-        {% csrf_token %}
-        
-        <label>Email</label>
-        <input type="text" name="email">
-        
-        <button type="submit" formmethod="post">
-            Send me a login link
-        </button>
-    </form>
+    {% if user %}
+        You are already logged in as {{user.first_name}} {{user.last_name}} ({{user.username}}).
+    {% else %}
+        To log in, fill in your email address and click the button below, you will receive an email with a link that will log you in automatically.
+        <br><br>
+        <form action="{% url 'epu:login' "" %}">
+            {% csrf_token %}
+            
+            <label>Email</label>
+            <input type="text" name="email">
+            
+            <button type="submit" formmethod="post">
+                Send me a login link
+            </button>
+        </form>
+    {% endif %}
 {% endblock %}
