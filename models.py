@@ -6,7 +6,6 @@ from django.contrib.auth.models import User as BaseUser
 
 class User(models.Model):
     base = models.OneToOneField(BaseUser, on_delete=models.CASCADE)
-    allowedPacks = models.ManyToManyField("Pack", related_name="allowedPacks")
     apiKey = models.CharField(max_length=64)
 
 class AuthKeys(models.Model):
@@ -16,8 +15,10 @@ class AuthKeys(models.Model):
 
 class Pack(models.Model):
     name = models.CharField(max_length=1024)
+    slug = models.CharField(max_length=256)
     gitURL = models.CharField(max_length=1024)
-    public = models.BooleanField(default=False)
+    instanceZip = models.FileField(upload_to="epu/zips/")
+    changelist = models.FileField(upload_to="epu/changelists/", blank=True)
     
     def __str__(self):
         return self.name
