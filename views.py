@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from functools import wraps
 import hashlib
 import time
 
@@ -13,7 +14,49 @@ from django.utils import timezone
 
 from .models import *
 
-def generatePassword(request):
+urlpatterns = []
+
+class Render(object):
+    def __init__(self, template, ctx={}, **responsekwargs):
+        self.template = template
+        self.ctx = ctx
+        self.responsekwargs = responsekwargs
+
+def route(pattern, **urlkwargs):
+    from django.conf.urls import url
+    from django.utils.decorators import available_attrs
+    
+    print(
+        "route({!r}, {})".format(
+            pattern,
+            ", ".join(
+                "{}={}".format(k, v) for k, v in urlkwargs.items()
+            )
+        )
+    )
+    
+    def decorator(func):
+        print("decorator called on", func.__qualname__)
+        
+        @wraps(func, assigned=available_attrs(func))
+        def wrapper(request, *args, **kwargs):
+            print("route wrapper for", request.path, "calling", func.__qualname__)
+            
+            result = func(request, *args, **kwargs)
+            
+            if type(result) is Render:
+                return render(request, result.template, result.ctx, **result.responsekwargs)
+            else:
+                return result
+        
+        urlpatterns.append(url(pattern, wrapper, **urlkwargs))
+        
+        return wrapper
+    
+    return decorator
+
+@route(r"^generate_password/?$", name="generatePassword")
+def generate_password(request):
     if not request.user.is_authenticated or not request.user.has_perm("auth.change_user"):
         return HttpResponseForbidden()
     
@@ -21,13 +64,14 @@ def generatePassword(request):
     
     return HttpResponse("blah\n" + password, content_type="text/plain")
 
+@route(r"^login/(?P<key>[a-zA-Z0-9]+)?$", name="login")
 def login(request, key):
     from bs4 import BeautifulSoup
     from django.contrib.auth import login
     
     if request.method == "GET":
         if not key:
-            return render(request, "epu/login.html")
+            return Render("epu/login.html", {"title": "Log in"})
         
         ctx = {}
         authObj = None
@@ -40,9 +84,9 @@ def login(request, key):
             
             login(request, authObj.user)
             
-            return render(request, "epu/login.html", {"info": "You have logged in."})
+            return Render("epu/login.html", {"title": "Log in successful", "info": "You have logged in."})
         except AuthKeys.DoesNotExist:
-            return render(request, "epu/login.html", {"error": "The authorization key is invalid (has it expired?)"})
+            return Render("epu/login.html", {"title": "Log in failed", "error": "The authorization key is invalid (has it expired?)"})
         finally:
             if authObj:
                 authObj.delete()
@@ -53,7 +97,7 @@ def login(request, key):
         email = request.POST.get("email", "")
         
         if email == "":
-            return render(request, "epu/login.html", {"error": "No email supplied"})
+            return Render("epu/login.html", {"error": "No email supplied"})
         
         try:
             user = BaseUser.objects.get(email__exact=email)
@@ -87,30 +131,33 @@ def login(request, key):
         except BaseUser.DoesNotExist:
             pass
         
-        return render(
-            request,
+        return Render(
             "epu/login.html",
             {
+                "title": "Log in pending",
                 "info": "An email has been sent to {} (if that email is registered). The link will expire after an hour.".format(email)
             }
         )
     else:
         return HttpResponseBadRequest()
 
+@route(r"^logout/$", name="logout")
 def logout(request):
     from django.contrib.auth import logout
     
     if request.user.is_authenticated:
         logout(request)
-        return render(request, "epu/login.html", {"info": "You have logged out."})
+        return Render("epu/login.html", {"info": "You have logged out."})
     else:
-        return render(request, "epu/login.html", {"error": "You are not logged in."})
+        return Render("epu/login.html", {"error": "You are not logged in."})
 
+@route(r"^pack/(?P<id>[0-9]+)", name="pack_detail")
 def pack(request, id):
     pack = get_object_or_404(Pack, pk=id)
     
-    return render(request, "epu/pack.html", {"pack": pack})
+    return Render("epu/pack.html", {"pack": pack})
 
+@route(r"^$", name="index")
 def index(request):
     packs = list(Pack.objects.filter(public=True))
     
@@ -125,4 +172,4 @@ def index(request):
         "packs": packs,
     }
     
-    return render(request, "epu/index.html", ctx)
+    return Render("epu/index.html", ctx)
