@@ -1,31 +1,37 @@
 {% load static %}
+{% load epu %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>
-        {% block title %}
-            {{title}} - EPU
-        {% endblock %}
-    </title>
+    {% block title %}
+        {% set title "Untitled" default=true %}
+    {% endblock %}
+    <title>{{title|default:"Untitled"}} - EPU</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="{% static "epu/common.css" %}">
     {% block head %}
     {% endblock %}
 </head>
 <body>
-    <div class="box">
-        <nav>
-            <ul>
-                <li><a href="{% url 'epu:index' %}">index</a></li>
-                {% if not user %}
-                    <li><a href="{% url 'epu:login' %}">login</a></li>
-                {% else %}
-                    <li><a href="{% url 'epu:logout' %}">logout</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+    <nav>
+        <ul>
+            <li><a href="{% url 'epu:index' %}">index</a></li>
+            
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'epu:logout' %}">logout</a></li>
+            {% else %}
+                <li><a href="{% url 'epu:login' %}">login</a></li>
+            {% endif %}
+            
+            {% if user.is_staff %}
+                <li><a href="{% url 'admin:index' %}" target="_blank">admin</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <main>
+        <h1>{{title|default:"Untitled"}}</h1>
         {% block body %}
         {% endblock %}
-    </div>
+    </main>
 </body>
 </html>

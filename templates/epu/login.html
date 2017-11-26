@@ -1,10 +1,9 @@
 {% extends "epu/base.html" %}
+{% load epu %}
 {% block title %}
-    Log in
+    {% set title "Log in" default=True %}
 {% endblock %}
 {% block body %}
-    <h1>Login</h1>
-    <br>
     {% if error %}
         <div class="box error">
             {{error}}
@@ -17,7 +16,7 @@
         </div>
     {% endif %}
     
-    {% if user %}
+    {% if user.is_authenticated %}
         You are already logged in as {{user.first_name}} {{user.last_name}} ({{user.username}}).
     {% else %}
         To log in, fill in your email address and click the button below, you will receive an email with a link that will log you in automatically.

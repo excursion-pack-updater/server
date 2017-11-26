@@ -1,15 +1,10 @@
 {% extends "epu/base.html" %}
+{% load epu %}
 {% block title %}
-    Pack Listing
+    {% set title "Packs" %}
 {% endblock %}
 {% block body %}
-    {% if info %}
-        <div class="box info">
-            {{info}}
-        </div>
-    {% endif %}
-    <h1>Packs</h1>
-    {% if user %}
+    {% if user.is_authenticated %}
         Hello {{user.first_name | default:user.username}}! You have access to the following packs:
     {% else %}
         The following public packs are available:
