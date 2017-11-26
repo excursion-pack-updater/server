@@ -5,8 +5,8 @@
 {% endblock %}
 {% block body %}
     <ul>
-        <li><a href="{% url 'epu:pack_detail' pack.id %}">MultiMC Instance</a></li>
-        <li><a href="{% url 'epu:pack_detail' pack.id %}">cgit</a></li>
-        <li><a href="{% url 'epu:pack_detail' pack.id %}">todo</a></li>
+        <li><a href="{% url 'epu:pack_instance' pack.id %}">MultiMC Instance</a></li>
+        <li><a href="{% url 'epu:pack_changelist' pack.id %}">changelist</a></li>
+        <li><a href="{% url 'epu:pack_get' pack.id ".gitignore" %}">get dem files</a></li>
     </ul>
 {% endblock %}

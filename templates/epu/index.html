@@ -1,17 +1,17 @@
 {% extends "epu/base.html" %}
 {% load epu %}
 {% block title %}
-    {% set title "Packs" %}
+    {% set title "Packs" default=True %}
 {% endblock %}
 {% block body %}
     {% if user.is_authenticated %}
-        Hello {{user.first_name | default:user.username}}! You have access to the following packs:
+        Hello {{user.first_name | default:user.username}}! The following packs are available:
+        <ul>
+            {% for pack in packs %}
+                <li><a href="{% url 'epu:pack_detail' pack.id %}">{{pack.name}}</a></li>
+            {% endfor %}
+        </ul>
     {% else %}
-        The following public packs are available:
+        Please log in.
     {% endif %}
-    <ul>
-        {% for pack in packs %}
-            <li><a href="{% url 'epu:pack_detail' pack.id %}">{{pack.name}}</a></li>
-        {% endfor %}
-    </ul>
 {% endblock %}

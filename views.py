@@ -26,22 +26,9 @@ def route(pattern, **urlkwargs):
     from django.conf.urls import url
     from django.utils.decorators import available_attrs
     
-    print(
-        "route({!r}, {})".format(
-            pattern,
-            ", ".join(
-                "{}={}".format(k, v) for k, v in urlkwargs.items()
-            )
-        )
-    )
-    
     def decorator(func):
-        print("decorator called on", func.__qualname__)
-        
         @wraps(func, assigned=available_attrs(func))
         def wrapper(request, *args, **kwargs):
-            print("route wrapper for", request.path, "calling", func.__qualname__)
-            
             result = func(request, *args, **kwargs)
             
             if type(result) is Render:
@@ -55,10 +42,13 @@ def route(pattern, **urlkwargs):
     
     return decorator
 
+def renderForbidden():
+    return Render("epu/index.html", {"title": "Forbidden", "error": "You must log in."}, status=403)
+
 @route(r"^generate_password/?$", name="generatePassword")
 def generate_password(request):
     if not request.user.is_authenticated or not request.user.has_perm("auth.change_user"):
-        return HttpResponseForbidden()
+        return renderForbidden()
     
     password = hashlib.sha1(str(time.time()).encode("utf-8")).hexdigest()
     
@@ -147,29 +137,51 @@ def logout(request):
     
     if request.user.is_authenticated:
         logout(request)
-        return Render("epu/login.html", {"info": "You have logged out."})
+        return Render("epu/login.html", {"title": "Logged out", "info": "You have logged out."})
     else:
-        return Render("epu/login.html", {"error": "You are not logged in."})
+        return Render("epu/login.html", {"title": "Log out failed", "error": "You are not logged in."})
 
-@route(r"^pack/(?P<id>[0-9]+)", name="pack_detail")
+@route(r"^pack/(?P<id>[0-9]+)/?$", name="pack_detail")
 def pack(request, id):
+    if not request.user.is_authenticated:
+        return renderForbidden()
+    
     pack = get_object_or_404(Pack, pk=id)
     
     return Render("epu/pack.html", {"pack": pack})
 
+@route(r"^pack/(?P<id>[0-9]+)/instance/?", name="pack_instance")
+def pack_instance(request, id):
+    if not request.user.is_authenticated:
+        return renderForbidden()
+    
+    pack = get_object_or_404(Pack, pk=id)
+    response = HttpResponse(pack.instanceZip.read(), content_type="application/zip")
+    response["Content-Disposition"] = "attachment; filename={}-instance.zip".format(pack.slug)
+    
+    return response
+
+@route(r"^pack/(?P<id>[0-9]+)/changelist/?", name="pack_changelist")
+def pack_changelist(request, id):
+    if not request.user.is_authenticated:
+        return renderForbidden()
+    
+    pack = get_object_or_404(Pack, pk=id)
+    
+    return HttpResponseServerError()
+
+@route(r"^pack/(?P<id>[0-9]+)/get/(?P<path>.*)$", name="pack_get")
+def pack_get(request, id, path):
+    if not request.user.is_authenticated:
+        return renderForbidden()
+    
+    pack = get_object_or_404(Pack, pk=id)
+    
+    return HttpResponseServerError()
+
 @route(r"^$", name="index")
 def index(request):
-    packs = list(Pack.objects.filter(public=True))
+    if not request.user.is_authenticated:
+        return renderForbidden()
     
-    if request.user.is_authenticated:
-        try:
-            user = User.objects.get(base=request.user)
-            packs += user.allowedPacks.all()
-        except User.DoesNotExist:
-            pass
-    
-    ctx = {
-        "packs": packs,
-    }
-    
-    return Render("epu/index.html", ctx)
+    return Render("epu/index.html", {"packs": Pack.objects.all()})
