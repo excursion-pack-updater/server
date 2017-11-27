@@ -109,20 +109,18 @@ def update_repos():
     for url in _repos.keys():
         if url in repoURLs:
             continue
-
-        repo = _repos.pop(url)
-
-        print("Closing repo", url)
-        repo.repo.close()
-
+        
+        print("Deleting repo", url)
+        _repos.pop(url)
+    
     for dict in repoURLs:
         url = dict["gitURL"]
-
+        
         if url in list(_repos.keys()):
             continue
-
+        
         print("Opening repo", url, "for modpack", dict["name"])
-
+        
         _repos[url] = Repository(url)
 
 def get_repo(url):
@@ -130,3 +128,10 @@ def get_repo(url):
         _repos[url] = Repository(url)
 
     return _repos[url]
+
+def reload_repo(url):
+    assert url in repos
+    
+    _repos.pop(url)
+    
+    return get_repo(url)
