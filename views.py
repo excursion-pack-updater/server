@@ -153,7 +153,7 @@ def pack(request, id):
     
     return Render("epu/pack.html", {"pack": pack})
 
-@route(r"^pack/(?P<id>[0-9]+)/instance/?", name="pack_instance")
+@route(r"^pack/(?P<id>[0-9]+)/instance/?$", name="pack_instance")
 def pack_instance(request, id):
     if not request.user.is_authenticated:
         return renderForbidden()
@@ -164,14 +164,41 @@ def pack_instance(request, id):
     
     return response
 
-@route(r"^pack/(?P<id>[0-9]+)/changelist/?", name="pack_changelist")
-def pack_changelist(request, id):
+@route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-zA-Z0-9]{40})?$", name="pack_changelist")
+def pack_changelist(request, id, commitSHA):
+    import json
+    
+    from dulwich.diff_tree import tree_changes
+    
     if not request.user.is_authenticated:
         return renderForbidden()
     
     pack = get_object_or_404(Pack, pk=id)
+    repo = get_repo(pack.gitURL)
+    head = repo.get_head_commit()
     
-    return HttpResponseServerError()
+    if commitSHA:
+        baseTreeSHA = repo.get_commit(commitSHA.encode("utf-8")).tree
+    else:
+        baseTreeSHA = b""
+    
+    changelist = {
+        "download": [],
+        "delete": [],
+        "sha": repo.get_commit_sha(head).decode("utf-8")
+    }
+    changes = tree_changes(repo.objs, baseTreeSHA, head.tree)
+    
+    for change in changes:
+        if change.type == "add" or change.type == "modify":
+            if change.type == "modify":
+                assert change.old.path == change.new.path, "old.path != new.path, don't know what to do!"
+            
+            changelist["download"].append(change.new.path.decode("utf-8"))
+        elif change.type == "delete":
+            changelist["delete"].append(change.old.path.decode("utf-8"))
+    
+    return HttpResponse(json.dumps(changelist), content_type="application/json")
 
 @route(r"^pack/(?P<id>[0-9]+)/get/(?P<path>.*)$", name="pack_get")
 def pack_get(request, id, path):

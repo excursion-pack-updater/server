@@ -72,6 +72,23 @@ class Repository(object):
         "Returns file contents as bytestring."
 
         return self.objs[self.files[path]].as_raw_string()
+    
+    def get_commit(self, sha):
+        return self.objs[sha]
+    
+    def get_head_commit(self):
+        return self.get_commit(self.branches[b"HEAD"])
+    
+    def get_root_commit(self):
+        commit = self.get_head_commit()
+        
+        while len(commit.parents) > 0:
+            commit = self.objs[commit.parents[0]]
+        
+        return commit
+    
+    def get_commit_sha(self, commit):
+        return commit.sha().hexdigest().encode("utf-8")
 
 def _progress(prefix):
     def func(msg):
