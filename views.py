@@ -13,6 +13,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import *
+from .git import update_repos, get_repo
+
+update_repos()
 
 urlpatterns = []
 
@@ -172,12 +175,15 @@ def pack_changelist(request, id):
 
 @route(r"^pack/(?P<id>[0-9]+)/get/(?P<path>.*)$", name="pack_get")
 def pack_get(request, id, path):
+    from .git import get_repo
+    
     if not request.user.is_authenticated:
         return renderForbidden()
     
     pack = get_object_or_404(Pack, pk=id)
+    repo = get_repo(pack.gitURL)
     
-    return HttpResponseServerError()
+    return HttpResponse(repo.read_file(path), content_type="application/octet-stream")
 
 @route(r"^$", name="index")
 def index(request):
