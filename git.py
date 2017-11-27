@@ -130,8 +130,7 @@ def get_repo(url):
     return _repos[url]
 
 def reload_repo(url):
-    assert url in repos
-    
-    _repos.pop(url)
+    if url in _repos:
+        _repos.pop(url)
     
     return get_repo(url)
