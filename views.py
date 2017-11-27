@@ -48,6 +48,17 @@ def route(pattern, **urlkwargs):
 def renderForbidden():
     return Render("epu/index.html", {"title": "Forbidden", "error": "You must log in."}, status=403)
 
+def valid_api_key(request):
+    key = request.META.get("HTTP_X_EPU_KEY", None)
+    
+    if not key:
+        return None
+    
+    try:
+        return User.objects.get(apiKey=key)
+    except User.DoesNotExist:
+        return None
+
 @route(r"^generate_password/?$", name="generatePassword")
 def generate_password(request):
     if not request.user.is_authenticated or not request.user.has_perm("auth.change_user"):
@@ -170,7 +181,7 @@ def pack_changelist(request, id, commitSHA):
     
     from dulwich.diff_tree import tree_changes
     
-    if not request.user.is_authenticated:
+    if not request.user.is_authenticated and not valid_api_key(request):
         return renderForbidden()
     
     pack = get_object_or_404(Pack, pk=id)
@@ -185,7 +196,6 @@ def pack_changelist(request, id, commitSHA):
     changelist = {
         "download": [],
         "delete": [],
-        "sha": repo.get_commit_sha(head).decode("utf-8")
     }
     changes = tree_changes(repo.objs, baseTreeSHA, head.tree)
     
@@ -202,15 +212,17 @@ def pack_changelist(request, id, commitSHA):
 
 @route(r"^pack/(?P<id>[0-9]+)/get/(?P<path>.*)$", name="pack_get")
 def pack_get(request, id, path):
+    import urllib
+    
     from .git import get_repo
     
-    if not request.user.is_authenticated:
+    if not request.user.is_authenticated and not valid_api_key(request):
         return renderForbidden()
     
     pack = get_object_or_404(Pack, pk=id)
     repo = get_repo(pack.gitURL)
     
-    return HttpResponse(repo.read_file(path), content_type="application/octet-stream")
+    return HttpResponse(repo.read_file(urllib.parse.unquote(path)), content_type="application/octet-stream")
 
 @route(r"^$", name="index")
 def index(request):
