@@ -175,6 +175,22 @@ def pack_instance(request, id):
     
     return response
 
+@route(r"^pack/(?P<id>[0-9]+)/version/?$", name="pack_version")
+def pack_version(request, id):
+    import json
+    
+    from dulwich.diff_tree import tree_changes
+    
+    if not request.user.is_authenticated and not valid_api_key(request):
+        return renderForbidden()
+    
+    pack = get_object_or_404(Pack, pk=id)
+    repo = get_repo(pack.gitURL)
+    head = repo.get_head_commit()
+    sha = repo.get_commit_sha(head).decode("utf-8")
+    
+    return HttpResponse(sha, content_type="text/plain")
+
 @route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-zA-Z0-9]{40})?$", name="pack_changelist")
 def pack_changelist(request, id, commitSHA):
     import json
@@ -223,6 +239,17 @@ def pack_get(request, id, path):
     repo = get_repo(pack.gitURL)
     
     return HttpResponse(repo.read_file(urllib.parse.unquote(path)), content_type="application/octet-stream")
+
+@route(r"^pack/(?P<id>[0-9]+)/reload", name="pack_reload")
+def pack_reload(request, id):
+    from .git import reload_repo
+    
+    if not request.user.is_authenticated and not valid_api_key(request).base.is_staff:
+        return renderForbidden()
+    
+    pack = get_object_or_404(Pack, pk=id)
+    
+    reload_repo(pack.gitURL)
 
 @route(r"^$", name="index")
 def index(request):
