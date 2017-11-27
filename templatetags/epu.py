@@ -10,12 +10,9 @@ def set(context, *values, **kwargs):
         name = context.get(name, None)
         
         if name != None:
-            print("that shit already set")
-            
             return ""
     
     value = kwargs.get("sep", " ").join(values[1:])
     context.dicts[-2][name] = value #set value in the context passed to render function
-    print(context.dicts[-2])
     
     return ""
