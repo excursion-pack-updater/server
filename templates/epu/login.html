@@ -4,18 +4,6 @@
     {% set title "Log in" default=True %}
 {% endblock %}
 {% block body %}
-    {% if error %}
-        <div class="box error">
-            {{error}}
-        </div>
-    {% endif %}
-    
-    {% if info %}
-        <div class="box info">
-            {{info}}
-        </div>
-    {% endif %}
-    
     {% if user.is_authenticated %}
         You are already logged in as {{user.first_name}} {{user.last_name}} ({{user.username}}).
     {% else %}

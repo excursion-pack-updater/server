@@ -28,6 +28,16 @@
             {% endif %}
         </ul>
     </nav>
+    {% if error %}
+        <div class="box error">
+            {{error}}
+        </div>
+    {% endif %}
+    {% if info %}
+        <div class="box info">
+            {{info}}
+        </div>
+    {% endif %}
     <main>
         <h1>{{title|default:"Untitled"}}</h1>
         {% block body %}

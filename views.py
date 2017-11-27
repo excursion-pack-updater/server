@@ -248,8 +248,9 @@ def pack_reload(request, id):
         return renderForbidden()
     
     pack = get_object_or_404(Pack, pk=id)
+    repo = reload_repo(pack.gitURL)
     
-    reload_repo(pack.gitURL)
+    return Render("epu/pack.html", {"info": "Repository reloaded.", "pack": pack})
 
 @route(r"^$", name="index")
 def index(request):

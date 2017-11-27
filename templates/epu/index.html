@@ -1,14 +1,24 @@
 {% extends "epu/base.html" %}
+{% load static %}
 {% load epu %}
 {% block title %}
     {% set title "Packs" default=True %}
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static "epu/index.css" %}">
 {% endblock %}
 {% block body %}
     {% if user.is_authenticated %}
         Hello {{user.first_name | default:user.username}}! The following packs are available:
         <ul>
             {% for pack in packs %}
-                <li><a href="{% url 'epu:pack_detail' pack.id %}">{{pack.name}}</a></li>
+                <li>
+                    <img class="pack-icon" src="{% static pack.icon_filename %}">
+                    <a href="{% url 'epu:pack_instance' pack.id %}">{{pack.name}}</a>
+                    {% if user.is_staff %}
+                        <a class="special" href="{% url 'epu:pack_detail' pack.id %}">edit</a>
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
     {% else %}

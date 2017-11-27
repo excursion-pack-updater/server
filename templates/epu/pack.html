@@ -1,4 +1,5 @@
 {% extends "epu/base.html" %}
+{% load static %}
 {% load epu %}
 {% block title %}
     {% set title "Modpack" pack.name %}
@@ -6,7 +7,10 @@
 {% block body %}
     <ul>
         <li><a href="{% url 'epu:pack_instance' pack.id %}">MultiMC Instance</a></li>
-        <li><a href="{% url 'epu:pack_changelist' pack.id %}">changelist</a></li>
-        <li><a href="{% url 'epu:pack_get' pack.id ".gitignore" %}">get dem files</a></li>
+        <li><a href="{% url 'epu:pack_changelist' pack.id %}">Changelist</a></li>
+        <li><a href="{% url 'epu:pack_version' pack.id %}">Version</a></li>
+        <li class="sep"></li>
+        <li><a href="{% url 'epu:pack_reload' pack.id %}">Reload repository</a></li>
     </ul>
+    <img class="pack-detail-icon" src="{% static pack.icon_filename %}">
 {% endblock %}
