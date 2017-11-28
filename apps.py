@@ -4,4 +4,17 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 class EpuConfig(AppConfig):
-    name = 'epu'
+    name = "epu"
+    verbose_name = "Excursion Pack Updater"
+    
+    def ready(self):
+        import sys
+        
+        from .git import update_repos
+        
+        #avoid running on manage.py commands, etc.
+        isDevServer = len(sys.argv) > 1 and sys.argv[1] == "runserver"
+        isProduction = len(sys.argv) == 1 #beware, your wsgi server may not behave as uwsgi
+        
+        if isDevServer or isProduction:
+            update_repos()

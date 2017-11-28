@@ -13,9 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import *
-from .git import update_repos, get_repo
-
-update_repos()
+from .git import get_repo
 
 urlpatterns = []
 
