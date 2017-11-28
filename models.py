@@ -21,7 +21,7 @@ class Pack(models.Model):
     gitURL = models.CharField(max_length=1024)
     instanceZip = models.FileField(upload_to="epu/zips/")
     updaterBinaries = models.FileField(upload_to="epu/zips/")
-    icon = models.FilePathField(path=os.path.join(settings.STATIC_ROOT, "epu/icons"), match="\.png$", recursive=False, default="infinity.png")
+    icon = models.FilePathField(path=os.path.join(settings.STATIC_ROOT, "epu/icons"), recursive=False, default="infinity.png")
     
     def __str__(self):
         return self.name
