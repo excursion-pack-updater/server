@@ -219,7 +219,7 @@ def pack_instance(request, id):
         
         with zip.open("minecraft/pack_sync.ini", "w") as f:
             f.write(
-                "baseURL={}://{}{}\n".format(
+                "backendURL={}://{}{}\n".format(
                     request.scheme,
                     request.META["HTTP_HOST"],
                     reverse("epu:index")
