@@ -8,7 +8,17 @@ from django.db import models
 
 class User(models.Model):
     base = models.OneToOneField(BaseUser, on_delete=models.CASCADE)
-    apiKey = models.CharField(max_length=64)
+    apiKey = models.CharField(max_length=64, blank=True)
+    
+    def save(self, *args, **kwargs):
+        import hashlib
+        import time
+        
+        if self.apiKey == "":
+            now = time.ctime().encode()
+            self.apiKey = hashlib.sha256(now).hexdigest()
+        
+        super().save(*args, **kwargs)
 
 class AuthKeys(models.Model):
     user = models.ForeignKey(BaseUser, on_delete=models.CASCADE)
