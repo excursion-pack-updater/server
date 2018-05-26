@@ -16,6 +16,7 @@
     <nav>
         <ul>
             <li><a href="{% url 'epu:index' %}">index</a></li>
+            <li><a href="{% url 'epu:howto' %}">howto</a></li>
             
             {% if user.is_authenticated %}
                 <li><a href="{% url 'epu:logout' %}">logout</a></li>

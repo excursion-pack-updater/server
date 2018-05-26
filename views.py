@@ -310,7 +310,7 @@ def pack_reload(request, id):
     
     return Render("epu/pack.html", {"info": "Repository reloaded.", "pack": pack})
 
-@route(r"howto/?")
+@route(r"howto/?", name="howto")
 def howto(request):
     #FIXME: cache
     import markdown
