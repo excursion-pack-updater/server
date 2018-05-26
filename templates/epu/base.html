@@ -41,6 +41,7 @@
     <main>
         <h1>{{title|default:"Untitled"}}</h1>
         {% block body %}
+            {{body|safe|default:"No body!"}}
         {% endblock %}
     </main>
 </body>
