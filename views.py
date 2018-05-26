@@ -310,6 +310,26 @@ def pack_reload(request, id):
     
     return Render("epu/pack.html", {"info": "Repository reloaded.", "pack": pack})
 
+@route(r"howto/?")
+def howto(request):
+    #FIXME: cache
+    import markdown
+    from django.contrib.staticfiles.finders import find
+    
+    src = ""
+    path = find("epu/howto.md")
+    
+    with open(path, "r") as f:
+        src = f.read()
+    
+    return Render(
+        "epu/base.html",
+        {
+            "title": "How to use EPU",
+            "body": markdown.markdown(src),
+        }
+    )
+
 @route(r"^$", name="index")
 def index(request):
     if not request.user.is_authenticated:
