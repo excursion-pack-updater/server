@@ -193,7 +193,7 @@ def pack_instance(request, id):
                             instanceCfg[key] = value
                     
                     instanceCfg["OverrideCommands"] = "true"
-                    instanceCfg["PreLaunchCommand"] = "CMD /C $INST_DIR/pack_sync.exe" #FIXME: hardcoded to Windows
+                    instanceCfg["PreLaunchCommand"] = 'CMD /C "$INST_DIR/pack_sync.exe"' #FIXME: hardcoded to Windows
                     instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
                     
                     with zip.open("instance.cfg", "w") as f:
