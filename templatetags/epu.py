@@ -6,7 +6,7 @@ register = template.Library()
 def set(context, *values, **kwargs):
     name = next(node for node in context["block"].nodelist if node.__class__.__name__ == "SimpleNode").args[0].var.var
     
-    if kwargs.get("default", False):
+    if "default" in kwargs:
         value = context.get(name, None)
         
         if value != None:
