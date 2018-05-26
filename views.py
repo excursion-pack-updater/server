@@ -325,7 +325,7 @@ def howto(request):
     return Render(
         "epu/base.html",
         {
-            "title": "How to use EPU",
+            "title": "How to use MultiMC",
             "body": markdown.markdown(src),
         }
     )
