@@ -1,4 +1,9 @@
 <style type="text/css">
+main
+{
+    font-family:  sans-serif;
+}
+
 ol > li
 {
     line-height: 1.75em;
