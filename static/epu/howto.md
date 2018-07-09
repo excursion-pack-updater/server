@@ -15,8 +15,12 @@ ol img
 }
 </style>
 
-## MultiMC Setup
-0. Click change settings ![](https://github.com/MultiMC/MultiMC5/raw/develop/application/resources/multimc/22x22/settings.png "Change settings")
+## MultiMC Installation
+0. Download [MultiMC](https://multimc.org/#Download%20%26%20Install) zip
+0. Extract the `MultiMC` folder in the zip somewhere
+    * Can be on your Desktop, in Documents, wherever
+0. Launch MultiMC.exe in this folder (optionally, make shortcuts)
+0. Click *change settings* ![](https://github.com/MultiMC/MultiMC5/raw/develop/application/resources/multimc/22x22/settings.png "Change settings")
 0. Select the Java tab
 0. Set your minimum, maximum and PermGen memory limits
     * Recommended values are:
@@ -26,15 +30,19 @@ ol img
 0. Ensure `Java path` is valid
 
 ## Instance Installation
-0. Download and install [MultiMC](https://multimc.org/#Download%20%26%20Install)
-0. Download the instance zip
 0. Launch MultiMC
-0. Click add instance ![](https://raw.githubusercontent.com/MultiMC/MultiMC5/develop/application/resources/multimc/22x22/new.png "Add instance")
-0. Name the instance accordingly (makes folders)
-0. Optionally, set group
+0. Click *add instance* ![](https://raw.githubusercontent.com/MultiMC/MultiMC5/develop/application/resources/multimc/22x22/new.png "Add instance")
+0. Name the instance accordingly (makes folders) and (optionally) set group
+    * Game version does not matter, will be set after extracting instance zip
 0. Hit OK, right click the new instance and select Instance Folder
-0. Extract instance.zip here
-0. Go back to MultiMC and click refresh ![](https://raw.githubusercontent.com/MultiMC/MultiMC5/develop/application/resources/multimc/22x22/refresh.png "Refresh") in the lower right
+0. Download and extract instance.zip into this folder, overwriting if necessary. Your folder structure should look something like this:
+    * `MultiMC/instances/InstanceName`
+        * `pack_sync.exe`
+        * `instance.cfg`
+        * `minecraft/`
+            * `pack_sync.ini`
+0. Go back to MultiMC and click *refresh* ![](https://raw.githubusercontent.com/MultiMC/MultiMC5/develop/application/resources/multimc/22x22/refresh.png "Refresh") in the lower right
+0. (optional, but recommended) Set memory options (See MultiMC Setup below)
 0. Double click on the instance to launch it
 0. Have a cup of tea while the instance downloads and launches
 
