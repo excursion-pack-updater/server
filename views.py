@@ -25,10 +25,9 @@ class Render(object):
 
 def route(pattern, **urlkwargs):
     from django.conf.urls import url
-    from django.utils.decorators import available_attrs
     
     def decorator(func):
-        @wraps(func, assigned=available_attrs(func))
+        @wraps(func)
         def wrapper(request, *args, **kwargs):
             result = func(request, *args, **kwargs)
             
@@ -67,7 +66,7 @@ def generate_password(request):
     return HttpResponse("blah\n" + password, content_type="text/plain")
 
 @route(r"^login/(?P<key>[a-zA-Z0-9]+)?$", name="login")
-def login(request, key):
+def login(request, key = None):
     from bs4 import BeautifulSoup
     from django.contrib.auth import login
     
