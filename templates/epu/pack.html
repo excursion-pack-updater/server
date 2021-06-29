@@ -10,7 +10,11 @@
         <li><a href="{% url 'epu:pack_changelist' pack.id %}">Changelist</a></li>
         <li><a href="{% url 'epu:pack_version' pack.id %}">Version</a></li>
         <li class="sep"></li>
-        <li><a href="{% url 'epu:pack_reload' pack.id %}">Reload repository</a></li>
+        <li>
+            <a href="{% url 'epu:pack_reload' pack.id %}">Reload repository</a>
+            &nbsp;&mdash;&nbsp;
+            <a href="#" onclick="prompt(`Poor Man's navigator.clipboard`, `{{request.build_absolute_uri}}reload?apikey={{epuUser.apiKey}}`);">get URL with key</a>
+        </li>
     </ul>
     <img class="pack-detail-icon" src="{% static pack.icon_filename %}">
 {% endblock %}

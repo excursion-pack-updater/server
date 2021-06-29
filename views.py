@@ -48,8 +48,11 @@ def renderUnauthenticated():
 def renderUnauthorized():
     return Render("epu/index.html", {"title": "Forbidden", "error": "You do not have permission to access this page."}, status=403)
 
-def valid_api_key(request):
+def valid_api_key(request, allowQuery = False):
     key = request.META.get("HTTP_X_EPU_KEY", None)
+    
+    if not key and allowQuery:
+        key = request.GET.get("apikey", None)
     
     if not key:
         return None
@@ -155,14 +158,14 @@ def logout(request):
     else:
         return Render("epu/login.html", {"title": "Log out failed", "error": "You are not logged in."})
 
-@route(r"^pack/(?P<id>[0-9]+)/?$", name="pack_detail")
+@route(r"^pack/(?P<id>[0-9]+)/$", name="pack_detail")
 def pack(request, id):
     if not request.user.is_authenticated:
         return renderUnauthenticated()
     
     pack = get_object_or_404(Pack, pk=id)
     
-    return Render("epu/pack.html", {"pack": pack})
+    return Render("epu/pack.html", {"pack": pack, "epuUser": User.objects.get(base=request.user)})
 
 @route(r"^pack/(?P<id>[0-9]+)/instance/?$", name="pack_instance")
 def pack_instance(request, id):
@@ -304,7 +307,7 @@ def pack_reload(request, id):
     from .git import reload_repo
     
     if not request.user.is_authenticated:
-        user = valid_api_key(request)
+        user = valid_api_key(request, True)
         if not user or not user.base.is_staff: return renderUnauthorized()
     
     pack = get_object_or_404(Pack, pk=id)
