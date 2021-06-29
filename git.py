@@ -48,25 +48,30 @@ class Repository(object):
         self.objs = self.repo.object_store
         commit = self.objs[self.branches[b"HEAD"]]
         tree = self.objs[commit.tree]
-        self.files = self.walk(tree) #TODO: break out into separate function
+        self.files, self.hashes = self.walk(tree)
 
     def walk(self, tree, path=b""):
+        from hashlib import sha1
         files = {}
+        hashes = {}
 
         for entry in tree.items():
             obj = self.objs[entry.sha]
             objType = type(obj)
 
             if objType is Tree:
-                files.update(
-                    self.walk(obj, os.path.join(path, entry.path))
-                )
+                data = self.walk(obj, os.path.join(path, entry.path))
+                files.update(data[0])
+                hashes.update(data[1])
             elif objType is Blob:
-                files[os.path.join(path, entry.path).decode("utf-8")] = entry.sha
+                # import pdb; pdb.set_trace()
+                fpath = os.path.join(path, entry.path).decode("utf-8")
+                files[fpath] = entry.sha
+                hashes[fpath] = sha1(self.objs[entry.sha].as_raw_string()).hexdigest()
             else:
                 raise TypeError("Don't know what to do with {}.{}".format(objType.__module__, objType.__name__))
-
-        return files
+        
+        return files, hashes
 
     def read_file(self, path):
         "Returns file contents as bytestring."

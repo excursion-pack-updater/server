@@ -250,7 +250,7 @@ def pack_version(request, id):
     return HttpResponse(sha, content_type="text/plain")
 
 @route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-fA-F0-9]{40})?$", name="pack_changelist")
-def pack_changelist(request, id, commitSHA):
+def pack_changelist(request, id, commitSHA = ""):
     import json
     
     from dulwich.diff_tree import tree_changes
@@ -270,6 +270,7 @@ def pack_changelist(request, id, commitSHA):
     changelist = {
         "download": [],
         "delete": [],
+        "hashes": repo.hashes,
     }
     changes = tree_changes(repo.objs, baseTreeSHA, head.tree)
     
