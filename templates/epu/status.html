@@ -1,0 +1,109 @@
+{% extends "epu/base.html" %}
+{% load static %}
+{% load epu %}
+{% block title %}
+    {% set title "Repositories Status" %}
+{% endblock %}
+{% block head %}
+    <style>
+        table
+        {
+            border-collapse: collapse;
+            width: 864px;
+            transform: translateX(-32px);
+        }
+        
+        table, tr, th, td
+        {
+            border: 1px solid black;
+        }
+        
+        th 
+        {
+            background-color: #f3f3f3;
+        }
+        
+        tbody tr
+        {
+            background-color: lightgreen;
+        }
+        
+        tr.failed
+        {
+            background-color: lightcoral;
+        }
+        
+        td
+        {
+            text-align: center;
+            padding: 10px 0px;
+        }
+        
+        td[colspan]
+        {
+            border-top: 0px;
+            background-color: #f3f3f3;
+            text-align: unset;
+        }
+        
+        td > pre
+        {
+            display: inline;
+            margin: 0px;
+            background-color: rgba(0.5, 0.5, 0.5, 0.1);
+        }
+        
+        details
+        {
+            max-width: 860px;
+        }
+        
+        details > pre
+        {
+            padding: 5px;
+            overflow-x: scroll;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <table>
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th>Failed</th>
+                <th>Last updated</th>
+                <th>HEAD</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for url, repo in repos.items %}
+                <tr class="{% if repo.failed %}failed{% endif %}">
+                    <td>{{url}}</td>
+                    <td>{{repo.failed}}</td>
+                    <td>
+                        {% if repo.failed %}
+                            N/A
+                        {% else %}
+                            <span title="{{repo.updated}} UTC">{{repo.updated|timesince}}</span> ago
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{repo.head}}
+                        <br>
+                        <pre>{{repo.headText}}</pre>
+                    </td>
+                </tr>
+                {% if repo.failed %}
+                <tr>
+                    <td colspan="4">
+                        <details>
+                            <summary>Error log</summary>
+                            <pre>{{repo.log}}</pre>
+                        </details>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

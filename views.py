@@ -335,6 +335,38 @@ def howto(request):
         }
     )
 
+@route(r"repo_status/?", name="repo_status")
+def repo_status(request):
+    import time
+    from . import git
+    
+    if not request.user.is_authenticated: return renderUnauthenticated()
+    if not request.user.is_staff: return renderUnauthorized()
+    
+    nowSecs = time.time()
+    now = timezone.now()
+    
+    def massage_repo(pair):
+        url, repo = pair
+        
+        if repo.failed:
+            return (url, {"failed": True, "log": repo.errlog})
+        
+        msg = repo.get_head_msg()
+        
+        if len(msg) > 40:
+            msg = msg[0:40].strip() + ".."
+        
+        info = {
+            "failed": False,
+            "updated": now - timezone.timedelta(seconds=nowSecs - repo.updated),
+            "head": repo.get_head_sha(),
+            "headText": msg,
+        }
+        return (url, info)
+    
+    return Render("epu/status.html", {"repos": dict(map(massage_repo, git._repos.items()))})
+
 @route(r"^$", name="index")
 def index(request):
     if not request.user.is_authenticated:

@@ -1,10 +1,10 @@
 from io import BytesIO
 import os
+import time
 
 from dulwich.client import get_transport_and_path
 from dulwich.objects import Tree, Blob
 from dulwich.repo import MemoryRepo
-from dulwich.errors import HangupException
 
 _repos = {}
 
@@ -21,6 +21,9 @@ class _GraphWalker(object):
 class Repository(object):
     def __init__(self, url):
         self.url = url
+        self.updated = 0
+        self.failed = True
+        self.errlog = "No log available"
 
         print("Connecting to repository at", url)
 
@@ -29,26 +32,33 @@ class Repository(object):
         
         try:
             self.branches = self.client.fetch(self.path, self.repo, lambda refs: [], progress=_progress("fetch")).refs
-        except HangupException as err:
+            
+            buffer = BytesIO()
+            file, commit, abort = self.repo.object_store.add_pack()
+
+            #TODO: support for different branches
+            print("Loading repository {}".format(url))
+            self.client.fetch_pack(self.path, lambda refs: [refs[b"HEAD"]], _GraphWalker(), pack_data=buffer.write, progress=_progress("pack"))
+            buffer.seek(0)
+            file.write(buffer.read())
+            commit()
+            print("Loading complete for repository {}".format(url))
+
+            self.objs = self.repo.object_store
+            commit = self.objs[self.branches[b"HEAD"]]
+            tree = self.objs[commit.tree]
+            self.files, self.hashes = self.walk(tree)
+            
+            self.updated = time.time()
+            self.failed = False
+        except Exception as err:
+            import traceback
+        
             print("Failed to load repo `{}`: {}".format(url, err))
+            self.errlog = "{}: {}\n\n{}".format(type(err).__name__, err, traceback.format_exc())
             
             return
         
-        buffer = BytesIO()
-        file, commit, abort = self.repo.object_store.add_pack()
-
-        #TODO: support for different branches
-        print("Loading repository")
-        self.client.fetch_pack(self.path, lambda refs: [refs[b"HEAD"]], _GraphWalker(), pack_data=buffer.write, progress=_progress("pack"))
-        buffer.seek(0)
-        file.write(buffer.read())
-        commit()
-        print("Loading complete")
-
-        self.objs = self.repo.object_store
-        commit = self.objs[self.branches[b"HEAD"]]
-        tree = self.objs[commit.tree]
-        self.files, self.hashes = self.walk(tree)
 
     def walk(self, tree, path=b""):
         from hashlib import sha1
@@ -94,6 +104,12 @@ class Repository(object):
     
     def get_commit_sha(self, commit):
         return commit.sha().hexdigest().encode("utf-8")
+    
+    def get_head_sha(self):
+        return self.branches[b"HEAD"].decode("utf-8")
+    
+    def get_head_msg(self):
+        return self.get_head_commit().message.decode("utf-8")
 
 def _progress(prefix):
     def func(msg):
