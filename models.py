@@ -38,3 +38,27 @@ class Pack(models.Model):
     
     def icon_filename(self):
         return self.icon.replace(settings.STATIC_ROOT, "")
+    
+    def save(self, *args, **kwargs):
+        import os
+        
+        try:
+            old = Pack.objects.get(id=self.id)
+            
+            if old.instanceZip != self.instanceZip:
+                os.remove(old.instanceZip.path)
+            
+            if old.updaterBinaries != self.updaterBinaries:
+                os.remove(old.updaterBinaries.path)
+        except Pack.DoesNotExist:
+            pass
+        
+        super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        import os
+        
+        os.remove(self.instanceZip.path)
+        os.remove(self.updaterBinaries.path)
+        
+        super().delete(*args, **kwargs)
