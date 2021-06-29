@@ -42,8 +42,11 @@ def route(pattern, **urlkwargs):
     
     return decorator
 
-def renderForbidden():
-    return Render("epu/index.html", {"title": "Forbidden", "error": "You must log in."}, status=403)
+def renderUnauthenticated():
+    return Render("epu/index.html", {"title": "Please log in", "error": "You must log in to access this page."}, status=401)
+
+def renderUnauthorized():
+    return Render("epu/index.html", {"title": "Forbidden", "error": "You do not have permission to access this page."}, status=403)
 
 def valid_api_key(request):
     key = request.META.get("HTTP_X_EPU_KEY", None)
@@ -58,8 +61,8 @@ def valid_api_key(request):
 
 @route(r"^generate_password/?$", name="generatePassword")
 def generate_password(request):
-    if not request.user.is_authenticated or not request.user.has_perm("auth.change_user"):
-        return renderForbidden()
+    if not request.user.is_authenticated: return renderUnauthenticated()
+    if not request.user.has_perm("auth.change_user"): return renderUnauthorized()
     
     password = hashlib.sha1(str(time.time()).encode("utf-8")).hexdigest()
     
@@ -155,7 +158,7 @@ def logout(request):
 @route(r"^pack/(?P<id>[0-9]+)/?$", name="pack_detail")
 def pack(request, id):
     if not request.user.is_authenticated:
-        return renderForbidden()
+        return renderUnauthenticated()
     
     pack = get_object_or_404(Pack, pk=id)
     
@@ -168,7 +171,7 @@ def pack_instance(request, id):
     import os
     
     if not request.user.is_authenticated:
-        return renderForbidden()
+        return renderUnauthenticated()
     
     pack = get_object_or_404(Pack, pk=id)
     user = User.objects.get(base__pk=request.user.id)
@@ -236,10 +239,8 @@ def pack_instance(request, id):
 def pack_version(request, id):
     import json
     
-    from dulwich.diff_tree import tree_changes
-    
     if not request.user.is_authenticated and not valid_api_key(request):
-        return renderForbidden()
+        return renderUnauthorized()
     
     pack = get_object_or_404(Pack, pk=id)
     repo = get_repo(pack.gitURL)
@@ -248,14 +249,14 @@ def pack_version(request, id):
     
     return HttpResponse(sha, content_type="text/plain")
 
-@route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-zA-Z0-9]{40})?$", name="pack_changelist")
+@route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-fA-F0-9]{40})?$", name="pack_changelist")
 def pack_changelist(request, id, commitSHA):
     import json
     
     from dulwich.diff_tree import tree_changes
     
     if not request.user.is_authenticated and not valid_api_key(request):
-        return renderForbidden()
+        return renderUnauthorized()
     
     pack = get_object_or_404(Pack, pk=id)
     repo = get_repo(pack.gitURL)
@@ -290,7 +291,7 @@ def pack_get(request, id, path):
     from .git import get_repo
     
     if not request.user.is_authenticated and not valid_api_key(request):
-        return renderForbidden()
+        return renderUnauthorized()
     
     pack = get_object_or_404(Pack, pk=id)
     repo = get_repo(pack.gitURL)
@@ -301,8 +302,9 @@ def pack_get(request, id, path):
 def pack_reload(request, id):
     from .git import reload_repo
     
-    if not request.user.is_authenticated and not valid_api_key(request).base.is_staff:
-        return renderForbidden()
+    if not request.user.is_authenticated:
+        user = valid_api_key(request)
+        if not user or not user.base.is_staff: return renderUnauthorized()
     
     pack = get_object_or_404(Pack, pk=id)
     repo = reload_repo(pack.gitURL)
@@ -332,6 +334,6 @@ def howto(request):
 @route(r"^$", name="index")
 def index(request):
     if not request.user.is_authenticated:
-        return renderForbidden()
+        return renderUnauthenticated()
     
     return Render("epu/index.html", {"packs": Pack.objects.all()})

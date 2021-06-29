@@ -22,6 +22,10 @@
             {% endfor %}
         </ul>
     {% else %}
-        Please log in.
+        {% if error %}
+            {{error}}
+        {% else %}
+            Nobody here but us chickens!
+        {% endif %}
     {% endif %}
 {% endblock %}
