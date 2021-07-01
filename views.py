@@ -167,8 +167,8 @@ def pack(request, id):
     
     return Render("epu/pack.html", {"pack": pack, "epuUser": User.objects.get(base=request.user)})
 
-@route(r"^pack/(?P<id>[0-9]+)/instance/?$", name="pack_instance")
-def pack_instance(request, id):
+@route(r"^pack/(?P<id>[0-9]+)/instance/(?P<platform>[a-zA-Z0-9]+)/?$", name="pack_instance")
+def pack_instance(request, id, platform):
     from io import BytesIO
     from zipfile import ZipFile
     import os
@@ -176,12 +176,28 @@ def pack_instance(request, id):
     if not request.user.is_authenticated:
         return renderUnauthenticated()
     
+    if not platform in ["win", "mac", "linux"]:
+        return Render("epu/index.html", {"title": "Error", "error": "Unknown platform"}, status = 400)
+    
     pack = get_object_or_404(Pack, pk=id)
+    bins = pack.updaterBinaries
     user = User.objects.get(base__pk=request.user.id)
     outBuffer = BytesIO()
+    binariesZip = None
+    
+    if platform == "win":
+        binariesZip = bins.winZip
+    elif platform == "mac":
+        binariesZip = bins.macZip
+    elif platform == "linux":
+        binariesZip = bins.linuxZip
+    else:
+        print("this should be impossible? id {} plat `{}`".format(id, platform))
+        return HttpResponseServerError()
     
     with ZipFile(outBuffer, "w") as zip:
         instanceBuffer = BytesIO(pack.instanceZip.read())
+        instanceCfg = {}
         
         with ZipFile(instanceBuffer, "r") as instanceZip:
             for info in instanceZip.infolist():
@@ -189,21 +205,11 @@ def pack_instance(request, id):
                     continue
                 
                 if info.filename == "instance.cfg":
-                    instanceCfg = {}
-                    
                     with instanceZip.open("instance.cfg", "r") as f:
                         for line in f:
                             line = line.decode("utf-8").strip()
                             key, value = line.split("=", 1)
                             instanceCfg[key] = value
-                    
-                    instanceCfg["OverrideCommands"] = "true"
-                    instanceCfg["PreLaunchCommand"] = 'CMD /C "$INST_DIR/pack_sync.exe"' #FIXME: hardcoded to Windows
-                    instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
-                    
-                    with zip.open("instance.cfg", "w") as f:
-                        for k, v in instanceCfg.items():
-                            f.write("{}={}\n".format(k, v).encode("utf-8"))
                     
                     continue
                 
@@ -211,7 +217,15 @@ def pack_instance(request, id):
                     with zip.open(info.filename, "w") as dest:
                         dest.write(src.read())
         
-        binariesBuffer = BytesIO(pack.updaterBinaries.read())
+        instanceCfg["OverrideCommands"] = "true"
+        instanceCfg["PreLaunchCommand"] = '"$INST_DIR/pack_sync{}"'.format(".exe" if platform == "win" else "")
+        instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
+        
+        with zip.open("instance.cfg", "w") as f:
+            for k, v in instanceCfg.items():
+                f.write("{}={}\n".format(k, v).encode("utf-8"))
+        
+        binariesBuffer = BytesIO(binariesZip.read())
         
         with ZipFile(binariesBuffer, "r") as binariesZip:
             for info in binariesZip.infolist():
@@ -222,7 +236,7 @@ def pack_instance(request, id):
                     with zip.open(info.filename, "w") as dest:
                         dest.write(src.read())
         
-        with zip.open("minecraft/pack_sync.ini", "w") as f:
+        with zip.open(".minecraft/pack_sync.ini", "w") as f:
             f.write(
                 "backendURL={}://{}{}\n".format(
                     request.scheme,
@@ -234,7 +248,7 @@ def pack_instance(request, id):
             f.write("apiKey={}\n".format(user.apiKey).encode("utf-8"))
     
     response = HttpResponse(outBuffer.getvalue(), content_type="application/zip")
-    response["Content-Disposition"] = "attachment; filename={}-instance.zip".format(pack.slug)
+    response["Content-Disposition"] = "attachment; filename={}.zip".format(pack.name)
     
     return response
 

@@ -6,7 +6,7 @@
 {% endblock %}
 {% block body %}
     <ul>
-        <li><a href="{% url 'epu:pack_instance' pack.id %}">MultiMC Instance</a></li>
+        {# <li><a href="{% url 'epu:pack_instance' pack.id %}">MultiMC Instance</a></li> #}
         <li><a href="{% url 'epu:pack_changelist' pack.id %}">Changelist</a></li>
         <li><a href="{% url 'epu:pack_version' pack.id %}">Version</a></li>
         <li class="sep"></li>

@@ -14,7 +14,13 @@
             {% for pack in packs %}
                 <li>
                     <img class="pack-icon" src="{% static pack.icon_filename %}">
-                    <a href="{% url 'epu:pack_instance' pack.id %}">{{pack.name}}</a>
+                    <strong>{{pack.name}}</strong>
+                    &nbsp;&mdash;&nbsp;
+                    <a href="{% url 'epu:pack_instance' pack.id 'win' %}">Windows x64</a>
+                    &nbsp;&nbsp;
+                    <a href="{% url 'epu:pack_instance' pack.id 'linux' %}">Linux</a>
+                    &nbsp;&nbsp;
+                    <a href="{% url 'epu:pack_instance' pack.id 'mac' %}">MacOS Intel x64</a>
                     {% if user.is_staff %}
                         <a class="special" href="{% url 'epu:pack_detail' pack.id %}">edit</a>
                     {% endif %}
