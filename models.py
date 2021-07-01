@@ -25,12 +25,51 @@ class AuthKeys(models.Model):
     key = models.CharField(max_length=64)
     expires = models.DateTimeField(auto_now=False, auto_now_add=False)
 
+class UpdaterBins(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    description = models.CharField(max_length=160)
+    winZip = models.FileField(upload_to="epu/zips/")
+    macZip = models.FileField(upload_to="epu/zips/")
+    linuxZip = models.FileField(upload_to="epu/zips/")
+    
+    class Meta:
+        verbose_name = "Updater Binary"
+        verbose_name_plural = "Updater Binaries"
+    
+    def __str__(self):
+        return "Binaries created {} ({})".format(self.created.strftime("%Y-%m-%d/%H:%M"), self.description)
+    
+    def save(self, *args, **kwargs):
+        try:
+            old = UpdaterBins.objects.get(id=self.id)
+            
+            if old.winZip != self.winZip:
+                os.remove(old.winZip.path)
+            
+            if old.macZip != self.macZip:
+                os.remove(old.macZip.path)
+            
+            if old.linuxZip != self.linuxZip:
+                os.remove(old.linuxZip.path)
+        except UpdaterBins.DoesNotExist:
+            pass
+        
+        super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        os.remove(self.winZip.path)
+        os.remove(self.macZip.path)
+        os.remove(self.linuxZip.path)
+        
+        super().delete(*args, **kwargs)
+
 class Pack(models.Model):
     name = models.CharField(max_length=1024)
     slug = models.CharField(max_length=256)
     gitURL = models.CharField(max_length=1024)
     instanceZip = models.FileField(upload_to="epu/zips/")
-    updaterBinaries = models.FileField(upload_to="epu/zips/")
+    updaterBinaries = models.ForeignKey(UpdaterBins, null=True, on_delete=models.SET_NULL)
     icon = models.FilePathField(path=os.path.join(settings.STATIC_ROOT, "epu/icons"), recursive=False, default="infinity.png")
     
     def __str__(self):
@@ -40,25 +79,17 @@ class Pack(models.Model):
         return self.icon.replace(settings.STATIC_ROOT, "")
     
     def save(self, *args, **kwargs):
-        import os
-        
         try:
             old = Pack.objects.get(id=self.id)
             
             if old.instanceZip != self.instanceZip:
                 os.remove(old.instanceZip.path)
-            
-            if old.updaterBinaries != self.updaterBinaries:
-                os.remove(old.updaterBinaries.path)
         except Pack.DoesNotExist:
             pass
         
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):
-        import os
-        
         os.remove(self.instanceZip.path)
-        os.remove(self.updaterBinaries.path)
         
         super().delete(*args, **kwargs)

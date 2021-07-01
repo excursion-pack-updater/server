@@ -5,14 +5,18 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User as BaseUser
 
-from epu.models import User, Pack
+from epu.models import User, UpdaterBins, Pack
 
-models = (
+simpleModels = (
     Pack,
 )
 
-for model in models:
+for model in simpleModels:
     admin.site.register(model)
+
+@admin.register(UpdaterBins)
+class UpdaterBinsAdmin(admin.ModelAdmin):
+    readonly_fields = ("created", "updated")
 
 class UserInline(admin.StackedInline):
     model = User
