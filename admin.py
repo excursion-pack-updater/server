@@ -7,16 +7,14 @@ from django.contrib.auth.models import User as BaseUser
 
 from epu.models import User, UpdaterBins, Pack
 
-simpleModels = (
-    Pack,
-)
-
-for model in simpleModels:
-    admin.site.register(model)
-
 @admin.register(UpdaterBins)
 class UpdaterBinsAdmin(admin.ModelAdmin):
     readonly_fields = ("created", "updated")
+
+@admin.register(Pack)
+class PackAdmin(admin.ModelAdmin):
+    class Media:
+        js = ("epu/pack-admin.js",)
 
 class UserInline(admin.StackedInline):
     model = User
@@ -25,9 +23,6 @@ class UserInline(admin.StackedInline):
 
 class UserAdmin(BaseUserAdmin):
     inlines = (UserInline,)
-    
-    class Media:
-        js = () #("epu/user-admin.js",)
     
 admin.site.unregister(BaseUser)
 admin.site.register(BaseUser, UserAdmin)
