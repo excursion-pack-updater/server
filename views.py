@@ -215,14 +215,14 @@ def pack_instance(request, id, platform):
                     continue
                 
                 with instanceZip.open(info.filename, "r") as src:
-                    with zip.open(info.filename, "w") as dest:
+                    with zip.open(os.path.join(pack.slug, info.filename), "w") as dest:
                         dest.write(src.read())
         
         instanceCfg["OverrideCommands"] = "true"
         instanceCfg["PreLaunchCommand"] = '"$INST_DIR/pack_sync{}"'.format(".exe" if platform == "win" else "")
         instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
         
-        with zip.open("instance.cfg", "w") as f:
+        with zip.open(os.path.join(pack.slug, "instance.cfg"), "w") as f:
             for k, v in instanceCfg.items():
                 f.write("{}={}\n".format(k, v).encode("utf-8"))
         
@@ -243,7 +243,7 @@ def pack_instance(request, id, platform):
                     with zip.open(newinfo, "w") as dest:
                         dest.write(src.read())
         
-        with zip.open(".minecraft/pack_sync.ini", "w") as f:
+        with zip.open(os.path.join(pack.slug, ".minecraft", "pack_sync.ini"), "w") as f:
             f.write(
                 "backendURL={}://{}{}\n".format(
                     request.scheme,
