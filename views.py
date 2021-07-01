@@ -255,7 +255,7 @@ def pack_instance(request, id, platform):
             f.write("apiKey={}\n".format(user.apiKey).encode("utf-8"))
     
     response = HttpResponse(outBuffer.getvalue(), content_type="application/zip")
-    response["Content-Disposition"] = "attachment; filename={}.zip".format(pack.name)
+    response["Content-Disposition"] = "attachment; filename={}.zip".format(pack.slug)
     
     return response
 
