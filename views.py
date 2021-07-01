@@ -220,6 +220,7 @@ def pack_instance(request, id, platform):
         
         instanceCfg["OverrideCommands"] = "true"
         instanceCfg["PreLaunchCommand"] = '"$INST_DIR/pack_sync{}"'.format(".exe" if platform == "win" else "")
+        instanceCfg["name"] = pack.name
         instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
         
         with zip.open(os.path.join(pack.slug, "instance.cfg"), "w") as f:
