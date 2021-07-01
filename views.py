@@ -170,7 +170,8 @@ def pack(request, id):
 @route(r"^pack/(?P<id>[0-9]+)/instance/(?P<platform>[a-zA-Z0-9]+)/?$", name="pack_instance")
 def pack_instance(request, id, platform):
     from io import BytesIO
-    from zipfile import ZipFile
+    from zipfile import ZipFile, ZipInfo
+    from stat import S_IFREG
     import os
     
     if not request.user.is_authenticated:
@@ -232,8 +233,14 @@ def pack_instance(request, id, platform):
                 if info.file_size <= 0:
                     continue
                 
+                newinfo = ZipInfo(os.path.join(pack.slug, info.filename))
+                
+                if platform != "win":
+                    # on unixen mark binaries as normal files (S_IFREG) with u+rwx,g+r,o+r
+                    newinfo.external_attr = (0o744 | S_IFREG) << 16
+                
                 with binariesZip.open(info.filename, "r") as src:
-                    with zip.open(info.filename, "w") as dest:
+                    with zip.open(newinfo, "w") as dest:
                         dest.write(src.read())
         
         with zip.open(".minecraft/pack_sync.ini", "w") as f:
