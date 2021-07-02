@@ -218,6 +218,8 @@ def pack_instance(request, id, platform):
                     with zip.open(os.path.join(pack.slug, info.filename), "w") as dest:
                         dest.write(src.read())
         
+        instanceCfg["InstanceType"] = "OneSix"
+        instanceCfg["MCLaunchMethod"] = "LauncherPart"
         instanceCfg["OverrideCommands"] = "true"
         instanceCfg["PreLaunchCommand"] = '"$INST_DIR/pack_sync{}"'.format(".exe" if platform == "win" else "")
         instanceCfg["name"] = pack.name
