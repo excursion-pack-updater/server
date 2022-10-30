@@ -6,6 +6,7 @@ from django.apps import AppConfig
 class EpuConfig(AppConfig):
     name = "epu"
     verbose_name = "Excursion Pack Updater"
+    default_auto_field = "django.db.models.AutoField"
     
     def ready(self):
         import sys
