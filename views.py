@@ -24,7 +24,7 @@ class Render(object):
         self.responsekwargs = responsekwargs
 
 def route(pattern, **urlkwargs):
-    from django.conf.urls import url
+    from django.urls import re_path
     
     def decorator(func):
         @wraps(func)
@@ -36,7 +36,7 @@ def route(pattern, **urlkwargs):
             else:
                 return result
         
-        urlpatterns.append(url(pattern, wrapper, **urlkwargs))
+        urlpatterns.append(re_path(pattern, wrapper, **urlkwargs))
         
         return wrapper
     
