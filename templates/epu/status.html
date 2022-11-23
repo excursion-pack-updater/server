@@ -70,7 +70,7 @@
         <thead>
             <tr>
                 <th>URL</th>
-                <th>Failed</th>
+                <th>Status</th>
                 <th>Last updated</th>
                 <th>HEAD</th>
             </tr>
@@ -79,7 +79,13 @@
             {% for url, repo in repos.items %}
                 <tr class="{% if repo.failed %}failed{% endif %}">
                     <td>{{url}}</td>
-                    <td>{{repo.failed}}</td>
+                    <td>
+                        {% if repo.failed %}
+                            Failed
+                        {% else %}
+                            Ok
+                        {% endif %}
+                    </td>
                     <td>
                         {% if repo.failed %}
                             N/A
