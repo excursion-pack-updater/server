@@ -58,7 +58,10 @@ def valid_api_key(request, allowQuery = False):
         return None
     
     try:
-        return User.objects.get(apiKey=key)
+        user = User.objects.get(apiKey=key)
+        if not user.base.is_active:
+            return None
+        return user
     except User.DoesNotExist:
         return None
 
