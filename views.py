@@ -108,8 +108,10 @@ def login(request, key = None):
         
         try:
             user = BaseUser.objects.get(email__exact=email)
+            if not user.is_active:
+                raise BaseUser.DoesNotExist
+            
             key = hashlib.sha256(str(time.time()).encode("utf-8")).hexdigest()
-            serverPort = request.META["SERVER_PORT"]
             body = get_template("epu/login_email.html").render(
                 {
                     "email": email,
