@@ -58,8 +58,7 @@ class Repository(object):
             self.errlog = "{}: {}\n\n{}".format(type(err).__name__, err, traceback.format_exc())
             
             return
-        
-
+    
     def walk(self, tree, path=b""):
         from hashlib import sha1
         files = {}

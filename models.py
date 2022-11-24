@@ -5,6 +5,8 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class User(models.Model):
     base = models.OneToOneField(BaseUser, on_delete=models.CASCADE)
@@ -93,3 +95,9 @@ class Pack(models.Model):
         os.remove(self.instanceZip.path)
         
         super().delete(*args, **kwargs)
+
+@receiver(post_save, sender=BaseUser)
+def onBaseUserSaved(sender, **kwargs):
+    base = kwargs["instance"]
+    if not User.objects.filter(base__pk=base.id).exists():
+        User(base=base).save()
