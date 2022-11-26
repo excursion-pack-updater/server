@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User as BaseUser
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 class User(models.Model):
@@ -96,8 +96,16 @@ class Pack(models.Model):
         
         super().delete(*args, **kwargs)
 
+@receiver(pre_save, sender=BaseUser)
+def baseUserPreSave(sender, **kwargs):
+    base = kwargs["instance"]
+    if len(base.password) > 0:
+        # effectively disable any use of password auth, e.g. login prompt in admin
+        base.password = ""
+
 @receiver(post_save, sender=BaseUser)
-def onBaseUserSaved(sender, **kwargs):
+def baseUserPostSave(sender, **kwargs):
     base = kwargs["instance"]
     if not User.objects.filter(base__pk=base.id).exists():
+        # ensure newly-created users have an API key generated for them
         User(base=base).save()
