@@ -335,6 +335,16 @@ def pack_reload(request, id):
     
     return Render("epu/pack.html", {"info": "Repository reloaded.", "pack": pack})
 
+@route(r"reload_packs/", name="pack_reload_all")
+def pack_reload_all(request):
+    from . import git
+    
+    if not request.user.is_authenticated: return renderUnauthenticated()
+    if not request.user.is_staff: return renderUnauthorized()
+    
+    git.update_repos()
+    return HttpResponseRedirect(reverse("epu:repo_status") + "?reloaded")
+
 @route(r"howto/?", name="howto")
 def howto(request):
     #FIXME: cache
@@ -386,7 +396,10 @@ def repo_status(request):
         }
         return (url, info)
     
-    return Render("epu/status.html", {"repos": dict(map(massage_repo, git._repos.items()))})
+    ctx = {"repos": dict(map(massage_repo, git._repos.items()))}
+    if "reloaded" in request.GET:
+        ctx["info"] = "Repositories reloaded."
+    return Render("epu/status.html", ctx)
 
 @route(r"^$", name="index")
 def index(request):

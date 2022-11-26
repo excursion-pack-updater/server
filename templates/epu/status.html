@@ -8,6 +8,7 @@
     <style>
         table
         {
+            margin-top: 1em;
             border-collapse: collapse;
             width: 864px;
             transform: translateX(-32px);
@@ -66,6 +67,7 @@
     </style>
 {% endblock %}
 {% block body %}
+    <a href="{% url 'epu:pack_reload_all' %}">Reload all repositories</a>
     <table>
         <thead>
             <tr>
