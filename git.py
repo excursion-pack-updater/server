@@ -125,7 +125,7 @@ def update_repos():
         .distinct()
     )
 
-    for url in _repos.keys():
+    for url in list(_repos.keys()):
         if url in repoURLs:
             continue
         
@@ -134,12 +134,10 @@ def update_repos():
     
     for dict in repoURLs:
         url = dict["gitURL"]
-        
-        if url in list(_repos.keys()):
+        if url in _repos:
             continue
         
         print("Opening repo", url, "for modpack", dict["name"])
-        
         _repos[url] = Repository(url)
 
 def get_repo(url):
