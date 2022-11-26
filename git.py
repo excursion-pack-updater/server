@@ -1,7 +1,7 @@
 from io import BytesIO
 import os
-import time
 
+from django.utils import timezone
 from dulwich.client import get_transport_and_path
 from dulwich.objects import Tree, Blob
 from dulwich.repo import MemoryRepo
@@ -21,7 +21,7 @@ class _GraphWalker(object):
 class Repository(object):
     def __init__(self, url):
         self.url = url
-        self.updated = 0
+        self.updated = timezone.now()
         self.failed = True
         self.errlog = "No log available"
 
@@ -49,7 +49,6 @@ class Repository(object):
             tree = self.objs[commit.tree]
             self.files, self.hashes = self.walk(tree)
             
-            self.updated = time.time()
             self.failed = False
         except Exception as err:
             import traceback

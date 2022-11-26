@@ -65,15 +65,6 @@ def valid_api_key(request, allowQuery = False):
     except User.DoesNotExist:
         return None
 
-@route(r"^generate_password/?$", name="generatePassword")
-def generate_password(request):
-    if not request.user.is_authenticated: return renderUnauthenticated()
-    if not request.user.has_perm("auth.change_user"): return renderUnauthorized()
-    
-    password = hashlib.sha1(str(time.time()).encode("utf-8")).hexdigest()
-    
-    return HttpResponse("blah\n" + password, content_type="text/plain")
-
 @route(r"^login/(?P<key>[a-zA-Z0-9]+)?$", name="login")
 def login(request, key = None):
     from bs4 import BeautifulSoup
@@ -372,23 +363,24 @@ def repo_status(request):
     if not request.user.is_authenticated: return renderUnauthenticated()
     if not request.user.is_staff: return renderUnauthorized()
     
-    nowSecs = time.time()
     now = timezone.now()
-    
     def massage_repo(pair):
         url, repo = pair
-        
         if repo.failed:
-            return (url, {"failed": True, "log": repo.errlog})
+            info = {
+                "failed": True,
+                "updated": repo.updated,
+                "log": repo.errlog,
+            }
+            return (url, info)
         
         msg = repo.get_head_msg()
-        
         if len(msg) > 40:
             msg = msg[0:40].strip() + ".."
         
         info = {
             "failed": False,
-            "updated": now - timezone.timedelta(seconds=nowSecs - repo.updated),
+            "updated": repo.updated,
             "head": repo.get_head_sha(),
             "headText": msg,
         }

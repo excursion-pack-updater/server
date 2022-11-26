@@ -87,11 +87,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if repo.failed %}
-                            N/A
-                        {% else %}
-                            <span title="{{repo.updated}} UTC">{{repo.updated|timesince}}</span> ago
-                        {% endif %}
+                        <span title="{{repo.updated}} UTC">{{repo.updated|timesince}}</span> ago
                     </td>
                     <td>
                         {{repo.head}}
