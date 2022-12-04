@@ -1,7 +1,7 @@
 # Excursion Pack Updater &mdash; Server
 ## Requirements
 * Python 3
-* Libraries listed in [`requirements.txt`](blob/master/requirements.txt)
+* Libraries listed in [`requirements.txt`](requirements.txt)
 * Outgoing email server (for login flow)
 
 ## Howto
@@ -111,7 +111,7 @@ With the possible exception of [Creating a Modpack](#creating-a-modpack), most o
 
 ### Creating a Modpack
 * Create a git repository containing the modpack's `mods/`, `config/`, and any other required files/directories (e.g. `kubejs/`.) If needed, push the repository somewhere visible to your EPU backend (e.g. a [gitea](https://gitea.io) instance)
-	* This repository may be shared with an active game server, in which case you should use the [recommended gitignore](blob/master/modpack.gitignore)
+	* This repository may be shared with an active game server, in which case you should use the [recommended gitignore](modpack.gitignore)
 * Open MultiMC and create a new instance, taking care to select the correct version of Minecraft. This instance will be temporary; the name does not matter
 * Right click the instance, select `Edit Instance`, and from the `Version` tab install the required mod platform (Forge/Fabric) of appropriate version
 * Close the settings window. Right click the instance again, and this time select `Instance Folder`. Create a zip containing at least `mmc-pack.json`. `instance.cfg` may be skipped as EPU will generate it on the fly (due to platform specifics.) Save the zip somewhere, and delete the instance
