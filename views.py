@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from functools import wraps
 import hashlib
+import json
 import time
 
 from django.contrib.auth.models import User as BaseUser
@@ -217,7 +218,7 @@ def pack_instance(request, id, platform):
         instanceCfg["InstanceType"] = "OneSix"
         instanceCfg["MCLaunchMethod"] = "LauncherPart"
         instanceCfg["OverrideCommands"] = "true"
-        instanceCfg["PreLaunchCommand"] = '"$INST_DIR/pack_sync{}"'.format(".exe" if platform == "win" else "")
+        instanceCfg["PreLaunchCommand"] = '"$INST_DIR/epu_client{}"'.format(".exe" if platform == "win" else "")
         instanceCfg["name"] = pack.name
         instanceCfg["iconKey"] = os.path.splitext(os.path.basename(pack.icon))[0]
         
@@ -226,15 +227,13 @@ def pack_instance(request, id, platform):
                 f.write("{}={}\n".format(k, v).encode("utf-8"))
         
         binariesBuffer = BytesIO(binariesZip.read())
-        
         with ZipFile(binariesBuffer, "r") as binariesZip:
             for info in binariesZip.infolist():
                 if info.file_size <= 0:
                     continue
                 
                 newinfo = ZipInfo(os.path.join(pack.slug, info.filename))
-                
-                if platform != "win":
+                if platform != "win" and not info.filename.endswith(".txt"):
                     # on unixen mark binaries as normal files (S_IFREG) with u+rwx,g+r,o+r
                     newinfo.external_attr = (0o744 | S_IFREG) << 16
                 
@@ -242,16 +241,14 @@ def pack_instance(request, id, platform):
                     with zip.open(newinfo, "w") as dest:
                         dest.write(src.read())
         
-        with zip.open(os.path.join(pack.slug, ".minecraft", "pack_sync.ini"), "w") as f:
-            f.write(
-                "backendURL={}://{}{}\n".format(
-                    request.scheme,
-                    request.META["HTTP_HOST"],
-                    reverse("epu:index")
-                ).encode("utf-8"),
-            )
-            f.write("packID={}\n".format(pack.id).encode("utf-8"))
-            f.write("apiKey={}\n".format(user.apiKey).encode("utf-8"))
+        with zip.open(os.path.join(pack.slug, ".minecraft", "epu_client.json"), "w") as f:
+            config = {
+                "backendUrl": f"{request.scheme}://{request.META['HTTP_HOST']}{reverse('epu:index')}",
+                "packId": pack.id,
+                "apiKey": user.apiKey,
+            }
+            # cannot dump to file directly -- `ZipWriteFile.write` doesn't accept `str`
+            f.write(json.dumps(config, indent="\t").encode("utf-8"))
     
     response = HttpResponse(outBuffer.getvalue(), content_type="application/zip")
     response["Content-Disposition"] = "attachment; filename={}.zip".format(pack.slug)
