@@ -68,10 +68,10 @@ Unfortunately MultiMC's built in import feature mucks up permissions, so packs n
     (confusingly named, this actually opens the instance<u>s</u> folder)
 0. Extract the folder from the zip into this one. Your folder structure should end up looking like this:
     * `<MultiMC root>/instances/<pack name>/`
-        * `pack_sync(.exe)`
+        * `epu_client(.exe)`
         * `instance.cfg`
         * `.minecraft/`
-            * `pack_sync.ini`
+            * `epu_client.json`
 0. Go back to MultiMC and it should automatically refresh, showing the new pack. A restart will fix it otherwise
 0. If required for the given pack, set overrides for memory options with (right click or sidebar >) Edit Instance > Settings sidebar tab > Java tab
 0. Double click on the instance to launch it
