@@ -1,0 +1,8 @@
+# recommended .gitignore for mopdpack repos that are also Minecraft servers
+
+*
+!.gitignore
+!mods/
+!mods/**
+!config/
+!config/**
