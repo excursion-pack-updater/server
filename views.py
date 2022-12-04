@@ -260,8 +260,6 @@ def pack_instance(request, id, platform):
 
 @route(r"^pack/(?P<id>[0-9]+)/version/?$", name="pack_version")
 def pack_version(request, id):
-    import json
-    
     if not request.user.is_authenticated and not valid_api_key(request):
         return renderUnauthorized()
     
@@ -274,8 +272,6 @@ def pack_version(request, id):
 
 @route(r"^pack/(?P<id>[0-9]+)/changelist/(?P<commitSHA>[a-fA-F0-9]{40})?$", name="pack_changelist")
 def pack_changelist(request, id, commitSHA = ""):
-    import json
-    
     from dulwich.diff_tree import tree_changes
     
     if not request.user.is_authenticated and not valid_api_key(request):
@@ -306,7 +302,7 @@ def pack_changelist(request, id, commitSHA = ""):
         elif change.type == "delete":
             changelist["delete"].append(change.old.path.decode("utf-8"))
     
-    return HttpResponse(json.dumps(changelist), content_type="application/json")
+    return JsonResponse(changelist, json_dumps_params={"indent": "\t"})
 
 @route(r"^pack/(?P<id>[0-9]+)/get/(?P<path>.*)$", name="pack_get")
 def pack_get(request, id, path):
