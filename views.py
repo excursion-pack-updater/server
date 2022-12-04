@@ -251,8 +251,7 @@ def pack_instance(request, id, platform):
             f.write(json.dumps(config, indent="\t").encode("utf-8"))
     
     response = HttpResponse(outBuffer.getvalue(), content_type="application/zip")
-    response["Content-Disposition"] = "attachment; filename={}.zip".format(pack.slug)
-    
+    response["Content-Disposition"] = f"attachment; filename={pack.slug}-{platform}.zip"
     return response
 
 @route(r"^pack/(?P<id>[0-9]+)/version/?$", name="pack_version")
