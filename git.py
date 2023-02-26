@@ -9,14 +9,13 @@ from dulwich.repo import MemoryRepo
 _repos = {}
 
 class _GraphWalker(object):
-    def ack(self, sha):
-        pass
+    def ack(self, sha): pass
+    
+    def nak(self): pass
 
-    def next(self):
-        pass
+    def next(self): pass
 
-    def __next__(self):
-        pass
+    def __next__(self): pass
 
 class Repository(object):
     def __init__(self, url):
