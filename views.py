@@ -244,7 +244,7 @@ def pack_instance(request, id, platform):
         with zip.open(os.path.join(pack.slug, ".minecraft", "epu_client.json"), "w") as f:
             config = {
                 "backendUrl": f"{request.scheme}://{request.META['HTTP_HOST']}{reverse('epu:index')}",
-                "packId": pack.id,
+                "packId": str(pack.id),
                 "apiKey": user.apiKey,
             }
             # cannot dump to file directly -- `ZipWriteFile.write` doesn't accept `str`
